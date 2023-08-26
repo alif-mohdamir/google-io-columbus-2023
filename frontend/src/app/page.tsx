@@ -1,7 +1,6 @@
 "use client";
 
 import BasicModal from "@/components/modal";
-// import Input from "@/components/input";
 import { DeleteOutline } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import {
@@ -14,10 +13,10 @@ import {
   ListItem,
   ListItemIcon,
   Stack,
-  useTheme,
   Input,
-  ListItemText,
-  Modal,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useState } from "react";
 import {
@@ -28,13 +27,17 @@ import {
 } from "react-hook-form";
 
 export default function Home() {
-  const [meals, setMeals] = useState<string[]>([]);
+  const [meals, setMeals] = useState<{ name: string; description: string }[]>(
+    []
+  );
   const methods = useForm({
     shouldUnregister: true,
     shouldFocusError: true,
   });
 
   const [loading, setLoading] = useState(false);
+
+  const [model, setModel] = useState("GPT-3.5-Turbo");
 
   const removeIngredient = (index: number) => () => {
     remove(index);
@@ -68,18 +71,21 @@ export default function Home() {
       );
       console.log("ingredients", ingredients);
 
-      const response = await fetch("/python-api/generate-meal", {
+      const response = await fetch("http://10.4.0.226:5000/generate-meal", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ingredients,
+          selected_meal: "",
+          model,
         }),
-        mode: "no-cors",
       });
 
       const responseData = await response.json();
+
+      console.log("responseData", responseData);
 
       if (!response.ok) {
         console.log("response => ", responseData);
@@ -90,18 +96,21 @@ export default function Home() {
       // split the string using regex
       // the regex checks for a number followed by a period
 
-      let meals = responseData.choices[0].message.content;
-      console.log("meals => ", meals);
+      const meals = responseData;
 
-      meals = meals.split(/\d+\./g);
-      // remove first array item
-      meals.shift();
+      // let meals = responseData.choices[0].message.content;
 
-      // before each - in the stribg, add a new line, but only if the - has a space before it
-      meals = meals.map((meal: string) => meal.replace(/(?<=\s)-/g, "\n-"));
+      // console.log("meals => ", meals);
 
-      // replace : with new line
-      meals = meals.map((meal: string) => meal.replace(/:/g, "\n"));
+      // meals = meals.split(/\d+\./g);
+      // // remove first array item
+      // meals.shift();
+
+      // // before each - in the stribg, add a new line, but only if the - has a space before it
+      // meals = meals.map((meal: string) => meal.replace(/(?<=\s)-/g, "\n-"));
+
+      // // replace : with new line
+      // meals = meals.map((meal: string) => meal.replace(/:/g, "\n"));
 
       console.log("data => ", meals);
 
@@ -118,70 +127,88 @@ export default function Home() {
       <div className="flex flex-col gap-10">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
-            <div className="max-w-md w-full flex flex-col">
-              <List subheader="Ingredients" className="w-full">
-                {fields.map((field, index) => {
-                  const ingredients = methods.formState.errors
-                    .ingredients as any;
-                  const errorValue = ingredients?.[index]?.value as any;
+            <Stack direction="row" spacing={4}>
+              <div className="max-w-md w-full flex flex-col gap-5">
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Model</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={model}
+                    label="Model"
+                    onChange={(e) => setModel(e.target.value as string)}
+                  >
+                    <MenuItem value={"gpt-3.5-turbo"}>GPT-3.5-Turbo</MenuItem>
+                    <MenuItem value={"bard"}>Bard</MenuItem>
+                  </Select>
+                </FormControl>
+                <List subheader="Ingredients" className="w-full">
+                  {fields.map((field, index) => {
+                    const ingredients = methods.formState.errors
+                      .ingredients as any;
+                    const errorValue = ingredients?.[index]?.value as any;
 
-                  return (
-                    <ListItem key={field.id}>
-                      <ListItemIcon>
-                        <Checkbox />
-                      </ListItemIcon>
-                      <FormControl fullWidth>
-                        <Input
-                          id={field.id}
-                          placeholder="e.g 1 cup of flour"
-                          error={Boolean(errorValue)}
-                          {...methods.register(`ingredients.${index}.value`, {
-                            validate: (value) => value !== "",
-                            required: "Ingredient can't be empty",
-                          })}
-                        />
-                        {errorValue && (
-                          <FormHelperText error>
-                            {errorValue?.message}
-                          </FormHelperText>
-                        )}
-                      </FormControl>
+                    return (
+                      <ListItem key={field.id}>
+                        <ListItemIcon>
+                          <Checkbox />
+                        </ListItemIcon>
+                        <FormControl fullWidth>
+                          <Input
+                            id={field.id}
+                            placeholder="e.g 1 cup of flour"
+                            error={Boolean(errorValue)}
+                            {...methods.register(`ingredients.${index}.value`, {
+                              validate: (value) => value !== "",
+                              required: "Ingredient can't be empty",
+                            })}
+                            disabled={methods.formState.isSubmitting || loading}
+                          />
+                          {errorValue && (
+                            <FormHelperText error>
+                              {errorValue?.message}
+                            </FormHelperText>
+                          )}
+                        </FormControl>
 
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={removeIngredient(index)}
-                      >
-                        <DeleteOutline />
-                      </IconButton>
-                    </ListItem>
-                  );
-                })}
-              </List>
-              <Stack direction="row" spacing={2}>
-                <Button
-                  color="secondary"
-                  variant="outlined"
-                  onClick={addIngredient}
-                  sx={{ textTransform: "none" }}
-                  disabled={methods.formState.isSubmitting}
-                >
-                  Add ingredient
-                </Button>
-                <LoadingButton
-                  color="secondary"
-                  variant="outlined"
-                  type="submit"
-                  loading={loading}
-                  sx={{ textTransform: "none" }}
-                  disabled={
-                    methods.formState.isSubmitting || !methods.formState.isValid
-                  }
-                >
-                  Generate meals
-                </LoadingButton>
-              </Stack>
-            </div>
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={removeIngredient(index)}
+                          disabled={methods.formState.isSubmitting || loading}
+                        >
+                          <DeleteOutline />
+                        </IconButton>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    color="secondary"
+                    variant="outlined"
+                    onClick={addIngredient}
+                    sx={{ textTransform: "none" }}
+                    disabled={methods.formState.isSubmitting}
+                  >
+                    Add ingredient
+                  </Button>
+                  <LoadingButton
+                    color="secondary"
+                    variant="outlined"
+                    type="submit"
+                    loading={loading}
+                    sx={{ textTransform: "none" }}
+                    disabled={
+                      methods.formState.isSubmitting ||
+                      !methods.formState.isValid
+                    }
+                  >
+                    Generate meals
+                  </LoadingButton>
+                </Stack>
+              </div>
+            </Stack>
           </form>
         </FormProvider>
         {meals.length > 0 && (
@@ -189,7 +216,7 @@ export default function Home() {
             {meals.map((meal, index) => (
               <ListItem className="rounded" key={index}>
                 <BasicModal
-                  label={`Meal ${index + 1}`}
+                  // label={`Meal ${index + 1}`}
                   meal={meal}
                   ingredients={methods.getValues().ingredients}
                 />

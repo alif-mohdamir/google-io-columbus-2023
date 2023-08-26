@@ -1,9 +1,11 @@
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
+
 import * as React from "react";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { ListItemButton, ListItemText } from "@mui/material";
+import { ListItemButton, ListItemText, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 
 const style = {
@@ -24,14 +26,16 @@ const style = {
 };
 
 interface ComponentProps {
-  meal: string;
-  label: string;
+  meal: { name: string; description: string };
+  // label: string;
   ingredients: any;
 }
 
 export default function BasicModal(props: ComponentProps) {
-  let { meal, label, ingredients } = props;
+  let { meal, ingredients } = props;
   const [open, setOpen] = React.useState(false);
+  // ref for audio player
+  const ref = React.useRef<any>(null);
 
   const [recipe, setRecipe] = React.useState<string | null>(null);
 
@@ -70,6 +74,9 @@ export default function BasicModal(props: ComponentProps) {
 
       console.log("responseData", responseData);
       setRecipe(responseData.choices[0].message.content);
+      if (ref.current) {
+        ref.current.audio.current.play();
+      }
       stopLoading();
     } catch (e) {
       stopLoading();
@@ -80,7 +87,7 @@ export default function BasicModal(props: ComponentProps) {
   return (
     <>
       <ListItemButton className="normal-case" onClick={handleOpen}>
-        <ListItemText primary={label} />
+        <ListItemText primary={meal.name} />
       </ListItemButton>
       <Modal
         open={open}
@@ -89,12 +96,16 @@ export default function BasicModal(props: ComponentProps) {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {meal.name}
+          </Typography>
           <Typography
             id="modal-modal-description"
             className="whitespace-pre-line"
           >
-            {meal}
+            {meal.description}
           </Typography>
+
           <LoadingButton
             variant="outlined"
             loading={loading}
@@ -105,12 +116,21 @@ export default function BasicModal(props: ComponentProps) {
           </LoadingButton>
 
           {recipe && (
-            <Typography
-              id="modal-modal-description"
-              className="whitespace-pre-line"
-            >
-              {recipe}
-            </Typography>
+            <Stack spacing={2}>
+              <Typography
+                id="modal-modal-description"
+                className="whitespace-pre-line"
+              >
+                {recipe}
+              </Typography>
+              <AudioPlayer
+                ref={ref}
+                autoPlay
+                src="http://example.com/audio.mp3"
+                onPlay={(e) => console.log("onPlay")}
+                // other props here
+              />
+            </Stack>
           )}
         </Box>
       </Modal>
