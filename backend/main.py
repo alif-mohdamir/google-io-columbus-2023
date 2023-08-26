@@ -65,7 +65,10 @@ async def provide_receipe(body: Request, background_tasks:BackgroundTasks):
 
      recipe = getModel(data['model']).generate_recipe(data['selectedMeal'],data['ingredients'])
 
-     background_tasks.add_task(generate_audio, recipe["choices"][0]["message"]["content"])
+     if data['model'] == 'bard':
+        background_tasks.add_task(generate_audio, recipe)
+     else:
+        background_tasks.add_task(generate_audio, recipe["choices"][0]["message"]["content"])
 
      return recipe
 

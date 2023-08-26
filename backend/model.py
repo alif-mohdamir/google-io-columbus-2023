@@ -127,7 +127,8 @@ class BardModel(Model):
 
         return my_list
 
-    def generate_recipe(self,background_tasks, selected_meal,ingredients = []):
+    def generate_recipe(self,selected_meal,ingredients = []):
+        print(selected_meal)
         response =  Bard().get_answer(f"Provide me a recipe for {selected_meal}")['content']
 
         print(response)
