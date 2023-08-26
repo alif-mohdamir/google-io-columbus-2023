@@ -1,21 +1,12 @@
 import openai
 import re
-from fastapi import BackgroundTasks
-from elevenlabs import generate, save
 
 
 from bardapi import Bard
 
 import os
 
-elevenlabs_api = os.getenv("ELEVENLABS_API_KEY")
 
-def generate_audio(text):
-    voice = "3UP3Y85k1txx71jKRnZF"
-    api_key = "24e080f7f717512bae3052ebc3c19ce9"
-    model = "eleven_monolingual_v1"
-    audio = generate(text=text,model=model, voice=voice, api_key=api_key)
-    save(audio, 'output.mp3')
 
 class Model:
     def execute(self):
@@ -49,7 +40,6 @@ class ChatGpt35Turbo(Model):
         matches = re.findall(r'\d+\..*', response.choices[0].message.content)
 
         
-        background_tasks.add_task(generate_audio, response["choices"][0]["message"]["content"])
 
         my_list = []
         for match in matches:
@@ -73,8 +63,11 @@ class ChatGpt35Turbo(Model):
 
 
     def generate_recipe(self,selected_meal,ingredients = []):
+
+        print(selected_meal)
+        print(ingredients)
         content="test"
-        response = openai.Completion.create(
+        response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-16k",
         messages=[
             {
@@ -96,6 +89,8 @@ class ChatGpt35Turbo(Model):
         frequency_penalty=0,
         presence_penalty=0
         )
+
+
 
         return response
 
@@ -132,7 +127,7 @@ class BardModel(Model):
 
         return my_list
 
-    def generate_recipe(self,selected_meal,ingredients = []):
+    def generate_recipe(self,background_tasks, selected_meal,ingredients = []):
         response =  Bard().get_answer(f"Provide me a recipe for {selected_meal}")['content']
 
         print(response)

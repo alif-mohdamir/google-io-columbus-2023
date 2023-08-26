@@ -2,8 +2,9 @@ import openai
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, BackgroundTasks
 from elevenlabs import generate, save
+
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -12,6 +13,15 @@ from model import BardModel
 
 load_dotenv()
 
+elevenlabs_api = os.getenv("ELEVENLABS_API_KEY")
+
+def generate_audio(text):
+    print("Calling generate")
+    voice = "3UP3Y85k1txx71jKRnZF"
+    api_key = "24e080f7f717512bae3052ebc3c19ce9"
+    model = "eleven_monolingual_v1"
+    audio = generate(text=text,model=model, voice=voice, api_key=api_key)
+    save(audio, 'output.mp3')
 
 
 bard = BardModel()
@@ -49,17 +59,16 @@ async def provide_meal(body: Request):
 
     return meals
 
-@app.post("/provide-receipe")
-def provide_receipe(body: Request):
-    # Provide recipe based on the selected meal
-    # recipe = generate_receipe(selected_meal)
+@app.post("/provide-recipe")
+async def provide_receipe(body: Request, background_tasks:BackgroundTasks):
+     data = await body.json()
 
 
-    print(body.model)
-    print(body.selectedMeal)
-    # selected_meal = "Jello"
+     recipe = getModel(data['model']).generate_recipe(data['selectedMeal'],data['ingredients'])
 
-    return "hi"
+     background_tasks.add_task(generate_audio, recipe["choices"][0]["message"]["content"])
+
+     return recipe
 
 
 @app.get("/health")
