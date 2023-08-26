@@ -28,13 +28,22 @@ def generate_meals(ingredients):
 
     return response
 
-def generate_receipe(selected_meal):
+def generate_receipe(selected_meal, ingredients):
+    content="test"
     response = openai.Completion.create(
     model="gpt-3.5-turbo-16k",
     messages=[
         {
-        "role": "user",
-        "content": f"Provide me a recipe for {selected_meal}"
+            "role": "user",
+            "content": f"Give me some meals based on the following ingredients. Not all items need to be used. {', '.join(ingredients)}"
+        },
+        {
+            "role": "assistant",
+            "content": content
+        },
+        {
+            "role": "user",
+            "content": f"Provide me a recipe for {selected_meal}"
         }
     ],
     temperature=1,
