@@ -1,8 +1,8 @@
 import openai
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
-
+from fastapi import FastAPI, Request, BackgroundTasks
+from elevenlabs import generate, save
 
 from model import ChatGpt35Turbo
 from model import Bard
@@ -22,6 +22,7 @@ app = FastAPI()
 load_dotenv()
 # Set your OpenAI API key here
 openai.api_key = os.getenv("OPENAI_API_KEY")
+elevenlabs_api = os.getenv("ELEVENLABS_API_KEY")
 
 
 def generate_meals(ingredients):
@@ -65,6 +66,15 @@ def generate_recipe(selected_meal, ingredients):
     return response
 
 
+def generate_audio(text):
+    voice = "3UP3Y85k1txx71jKRnZF"
+    api_key = "24e080f7f717512bae3052ebc3c19ce9"
+    model = "eleven_monolingual_v1"
+    audio = generate(text=text,model=model, voice=voice, api_key=api_key)
+    save(audio, 'output.mp3')
+
+
+
 @app.post("/generate-meal")
 async def generate_from_openai(payload: Request):
     data = await payload.json()
@@ -75,13 +85,17 @@ async def generate_from_openai(payload: Request):
 
 
 @app.post("/provide-recipe")
-async def provide_recipe(payload: Request):
+async def provide_recipe(payload: Request, background_tasks: BackgroundTasks):
     data = await payload.json()
     selected_meal = data["meal"]
     ingredients = data["ingredients"]
     # Provide recipe based on the selected meal
 
     recipe = generate_recipe(selected_meal, ingredients=ingredients)
+
+    # generate_audio(recipe["choices"][0]["message"]["content"])
+
+    background_tasks.add_task(generate_audio, recipe["choices"][0]["message"]["content"])
 
     return recipe
 
