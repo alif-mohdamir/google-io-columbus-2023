@@ -14,7 +14,7 @@ def generate_meals(ingredients):
     messages=[
         {
         "role": "user",
-        "content": f"Give me 10 meals based on the following ingredients. Not all items need to be used: {', '.join(ingredients)}"
+        "content": f"Give me some meals based on the following ingredients. Not all items need to be used. {', '.join(ingredients)}"
         }
     ],
     temperature=1,
