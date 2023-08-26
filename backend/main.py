@@ -3,6 +3,17 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from model import ChatGpt35Turbo
+from model import Bard
+
+isBard = True
+
+def getModel():
+    if isBard == true:
+        return Bard()
+
+    return ChatGpt35Turbo()
+
 app = FastAPI()
 
 load_dotenv()
@@ -71,5 +82,10 @@ def provide_receipe():
     recipe = generate_receipe(selected_meal)
 
     selected_meal = "Jello"
+
+
+@app.get("/health")
+def health():
+    return "hi there!"
 
     
