@@ -1,7 +1,9 @@
 import openai
 import os
 from dotenv import load_dotenv
+from fastapi import FastAPI
 
+app = FastAPI()
 
 load_dotenv()
 # Set your OpenAI API key here
@@ -26,12 +28,13 @@ def generate_meals(ingredients):
 
     return response
 
-# List of ingredients you have
-my_ingredients = ["Jello", "honey", "bread", "walnuts", "peanuts", "chia", "seeds", "rice", "flour", "potatoes", "milk", "watermelon", "peanut butter", "greek yogurt", "mushrooms", "broccoli", "apples", "pancetta", "brussel", "sprouts", "sausage", "pork tenderloins"]
+@app("/openai")
+def generate_from_openai():
+    # List of ingredients you have
+    my_ingredients = ["Jello", "honey", "bread", "walnuts", "peanuts", "chia", "seeds", "rice", "flour", "potatoes", "milk", "watermelon", "peanut butter", "greek yogurt", "mushrooms", "broccoli", "apples", "pancetta", "brussel", "sprouts", "sausage", "pork tenderloins"]
 
-recommended_meals = generate_meals(my_ingredients)
-print(recommended_meals) 
+    recommended_meals = generate_meals(my_ingredients)
+    print(recommended_meals) 
 
-
-
+    return generate_meals(my_ingredients)
 
