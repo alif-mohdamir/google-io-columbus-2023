@@ -36,5 +36,5 @@ def generate_from_openai():
     recommended_meals = generate_meals(my_ingredients)
     print(recommended_meals) 
 
-    return generate_meals(my_ingredients)
+    return recommended_meals 
 
