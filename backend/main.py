@@ -1,103 +1,65 @@
 import openai
 import os
+
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, BackgroundTasks
+from fastapi import FastAPI, Request
 from elevenlabs import generate, save
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from model import ChatGpt35Turbo
-from model import Bard
+from model import BardModel
 
-isBard = True
+load_dotenv()
 
 
-def getModel():
-    if isBard == true:
-        return Bard()
 
-    return ChatGpt35Turbo()
+bard = BardModel()
+chatGpt35Turbo = ChatGpt35Turbo()
+
+def getModel(model=""):
+    if model == "bard":
+        return bard
+
+    return chatGpt35Turbo
 
 
 app = FastAPI()
 
-load_dotenv()
-# Set your OpenAI API key here
-openai.api_key = os.getenv("OPENAI_API_KEY")
-elevenlabs_api = os.getenv("ELEVENLABS_API_KEY")
+origins = [
+    "*"
+]
 
-
-def generate_meals(ingredients):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k",
-        messages=[
-            {
-                "role": "user",
-                "content": f"Give me some meals based on the following ingredients. Not all items need to be used. {', '.join(ingredients)}",
-            }
-        ],
-        temperature=1,
-        max_tokens=1638,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-    )
-
-    return response
-
-
-def generate_recipe(selected_meal, ingredients):
-    content = "test"
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k",
-        messages=[
-            {
-                "role": "user",
-                "content": f"Give a recipe based on the following ingredients. Not all items need to be used. {', '.join(ingredients)}. ",
-            },
-            {"role": "assistant", "content": content},
-            {"role": "user", "content": f"Provide me a recipe for {selected_meal}"},
-        ],
-        temperature=1,
-        max_tokens=1638,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-    )
-
-    return response
-
-
-def generate_audio(text):
-    voice = "3UP3Y85k1txx71jKRnZF"
-    api_key = "24e080f7f717512bae3052ebc3c19ce9"
-    model = "eleven_monolingual_v1"
-    audio = generate(text=text,model=model, voice=voice, api_key=api_key)
-    save(audio, 'output.mp3')
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # You can restrict HTTP methods if needed
+    allow_headers=["*"],  # You can restrict headers if needed
+)
 
 
 @app.post("/generate-meal")
-async def generate_from_openai(payload: Request):
-    data = await payload.json()
-    ingredients = data["ingredients"]
-    recommended_meals = generate_meals(ingredients=ingredients)
+async def provide_meal(body: Request):
 
-    return recommended_meals
+    data = await body.json()
 
 
-@app.post("/provide-recipe")
-async def provide_recipe(payload: Request, background_tasks: BackgroundTasks):
-    data = await payload.json()
-    selected_meal = data["meal"]
-    ingredients = data["ingredients"]
+    meals = getModel(data['model']).generate_meals(data['ingredients'])
+
+    return meals
+
+@app.post("/provide-receipe")
+def provide_receipe(body: Request):
     # Provide recipe based on the selected meal
+    # recipe = generate_receipe(selected_meal)
 
-    recipe = generate_recipe(selected_meal, ingredients=ingredients)
 
-    # generate_audio(recipe["choices"][0]["message"]["content"])
+    print(body.model)
+    print(body.selectedMeal)
+    # selected_meal = "Jello"
 
-    background_tasks.add_task(generate_audio, recipe["choices"][0]["message"]["content"])
-
-    return recipe
+    return "hi"
 
 
 @app.get("/health")
