@@ -37,7 +37,7 @@ export default function Home() {
 
   const [loading, setLoading] = useState(false);
 
-  const [model, setModel] = useState("GPT-3.5-Turbo");
+  const [model, setModel] = useState("gpt-3.5-turbo");
 
   const removeIngredient = (index: number) => () => {
     remove(index);
@@ -78,7 +78,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           ingredients,
-          selected_meal: "",
+          selectedMeal: "",
           model,
         }),
       });
@@ -150,9 +150,9 @@ export default function Home() {
 
                     return (
                       <ListItem key={field.id}>
-                        <ListItemIcon>
+                        {/* <ListItemIcon>
                           <Checkbox />
-                        </ListItemIcon>
+                        </ListItemIcon> */}
                         <FormControl fullWidth>
                           <Input
                             id={field.id}
