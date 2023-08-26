@@ -55,13 +55,13 @@ export default function BasicModal(props: ComponentProps) {
     try {
       startLoading();
       ingredients = ingredients.map(({ value }: { value: string }) => value);
-      const response = await fetch("/python-api/provide-recipe", {
+      const response = await fetch("http://10.4.0.226:5000/provide-recipe", {
         method: "POST",
         body: JSON.stringify({
-          meal,
+          selectedMeal: meal.name,
           ingredients,
+          model: "",
         }),
-        mode: "no-cors",
       });
 
       const responseData = await response.json();
