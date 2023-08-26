@@ -55,7 +55,7 @@ def generate_receipe(selected_meal, ingredients):
 
     return response
 
-@app("/generate-meal")
+@app.post("/generate-meal")
 def generate_from_openai():
     # List of ingredients you have
     my_ingredients = ["Jello", "honey", "bread", "walnuts", "peanuts", "chia", "seeds", "rice", "flour", "potatoes", "milk", "watermelon", "peanut butter", "greek yogurt", "mushrooms", "broccoli", "apples", "pancetta", "brussel", "sprouts", "sausage", "pork tenderloins"]
@@ -65,7 +65,7 @@ def generate_from_openai():
 
     return recommended_meals 
 
-@app("/provide-receipe")
+@app.post("/provide-receipe")
 def provide_receipe():
     # Provide recipe based on the selected meal
     recipe = generate_receipe(selected_meal)
