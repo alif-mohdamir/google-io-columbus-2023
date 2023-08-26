@@ -4,7 +4,7 @@ const nextConfig = () => {
     return [
       {
         source: "/python-api/:path*",
-        destination: "http://127.0.0.1:8000/:path*",
+        destination: "http://127.0.0.1:80/:path*",
       },
     ];
   };

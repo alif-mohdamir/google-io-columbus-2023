@@ -28,7 +28,7 @@ import {
 } from "react-hook-form";
 
 export default function Home() {
-  const [recipes, setRecipes] = useState<string[]>([]);
+  const [meals, setMeals] = useState<string[]>([]);
   const methods = useForm({
     shouldUnregister: true,
     shouldFocusError: true,
@@ -68,11 +68,15 @@ export default function Home() {
       );
       console.log("ingredients", ingredients);
 
-      const response = await fetch("/python-path/generate-meal", {
+      const response = await fetch("/python-api/generate-meal", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           ingredients,
         }),
+        mode: "no-cors",
       });
 
       const responseData = await response.json();
@@ -83,7 +87,25 @@ export default function Home() {
         throw new Error("Network response was not ok");
       }
 
-      console.log("data => ", responseData);
+      // split the string using regex
+      // the regex checks for a number followed by a period
+
+      let meals = responseData.choices[0].message.content;
+      console.log("meals => ", meals);
+
+      meals = meals.split(/\d+\./g);
+      // remove first array item
+      meals.shift();
+
+      // before each - in the stribg, add a new line, but only if the - has a space before it
+      meals = meals.map((meal: string) => meal.replace(/(?<=\s)-/g, "\n-"));
+
+      // replace : with new line
+      meals = meals.map((meal: string) => meal.replace(/:/g, "\n"));
+
+      console.log("data => ", meals);
+
+      setMeals(meals);
       stopLoading();
     } catch (e) {
       stopLoading();
@@ -156,20 +178,22 @@ export default function Home() {
                     methods.formState.isSubmitting || !methods.formState.isValid
                   }
                 >
-                  Generate recipes
+                  Generate meals
                 </LoadingButton>
               </Stack>
             </div>
           </form>
         </FormProvider>
-        {recipes.length > 0 && (
-          <List subheader="Recipes" className="w-full">
-            {recipes.map((recipe, index) => (
-              <BasicModal
-                key={index}
-                label={`Recipe ${index + 1}`}
-                recipe={recipe}
-              />
+        {meals.length > 0 && (
+          <List subheader="Meals" className="w-full gap-2 flex flex-col">
+            {meals.map((meal, index) => (
+              <ListItem className="rounded" key={index}>
+                <BasicModal
+                  label={`Meal ${index + 1}`}
+                  meal={meal}
+                  ingredients={methods.getValues().ingredients}
+                />
+              </ListItem>
             ))}
           </List>
         )}
