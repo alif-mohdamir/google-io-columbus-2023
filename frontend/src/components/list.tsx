@@ -2,7 +2,7 @@ import React from 'react';
 import { List as MuiList, ListItem, ListItemText } from '@mui/material';
 
 
-const List = ({ items }: { items: Array<any> }) => {
+const List = ({ items }: { items: Array<string> }) => {
   const placeholderItems = [
     'item 1', 'item2'
   ]
