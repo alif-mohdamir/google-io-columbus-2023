@@ -71,7 +71,7 @@ export default function Home() {
       );
       console.log("ingredients", ingredients);
 
-      const response = await fetch("http://10.4.0.226:5000/generate-meal", {
+      const response = await fetch("/python-api/generate-meal", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

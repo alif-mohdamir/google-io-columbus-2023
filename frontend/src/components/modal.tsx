@@ -55,7 +55,7 @@ export default function BasicModal(props: ComponentProps) {
     try {
       startLoading();
       ingredients = ingredients.map(({ value }: { value: string }) => value);
-      const response = await fetch("http://10.4.0.226:5000/provide-recipe", {
+      const response = await fetch("/python-api/provide-recipe", {
         method: "POST",
         body: JSON.stringify({
           selectedMeal: meal.name,
@@ -126,7 +126,6 @@ export default function BasicModal(props: ComponentProps) {
               <AudioPlayer
                 ref={ref}
                 autoPlay
-                src="http://example.com/audio.mp3"
                 onPlay={(e) => console.log("onPlay")}
                 // other props here
               />
