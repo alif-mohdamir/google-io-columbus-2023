@@ -17,10 +17,9 @@ elevenlabs_api = os.getenv("ELEVENLABS_API_KEY")
 
 def generate_audio(text):
     print("Calling generate")
-    voice = "3UP3Y85k1txx71jKRnZF"
-    api_key = "24e080f7f717512bae3052ebc3c19ce9"
+    voice = "67NrdU0ydS84C9UBnZrH"
     model = "eleven_monolingual_v1"
-    audio = generate(text=text,model=model, voice=voice, api_key=api_key)
+    audio = generate(text=text,model=model, voice=voice, api_key=elevenlabs_api)
     save(audio, 'output.mp3')
 
 
