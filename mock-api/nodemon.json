@@ -1,0 +1,9 @@
+{
+    "env": {
+      "PORT": "8000"
+    },
+    "watch": ["src"],
+    "ext": "js",
+    "exec": "npm run start",
+    "delay": 1
+  }
