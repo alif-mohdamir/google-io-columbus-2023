@@ -126,7 +126,7 @@ export default function MealModal(props: ComponentProps) {
       {recipe && (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Recipe</DialogTitle>
+            <DialogTitle>{meal.name} Recipe</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2">
             <div className="whitespace-pre-line">{recipe}</div>
