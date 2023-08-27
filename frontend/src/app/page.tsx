@@ -115,7 +115,7 @@ export default function Home() {
         <ThemeToggle />
       </div>
       <div className="flex min-h-screen flex-col items-center justify-between">
-        <div className="grid grid-flow-col gap-10">
+        <div className="grid md:grid-flow-col grid-flow-row gap-10">
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(generateMeals)}>
               <Card>
