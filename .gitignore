@@ -1,5 +1,11 @@
 node_modules
+
 .env
+
 .next
+
 __pycache__
+
 output.mp3
+
+.env.development.local

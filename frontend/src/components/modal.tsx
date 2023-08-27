@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import { ListItemButton, ListItemText, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import { base64StringToBlob } from "@/utils";
 
 const style = {
   position: "absolute" as "absolute",
@@ -27,7 +28,6 @@ const style = {
 
 interface ComponentProps {
   meal: { name: string; description: string };
-  // label: string;
   ingredients: any;
 }
 
@@ -36,6 +36,7 @@ export default function BasicModal(props: ComponentProps) {
   const [open, setOpen] = React.useState(false);
   // ref for audio player
   const ref = React.useRef<any>(null);
+  const [audio, setAudio] = React.useState<HTMLAudioElement | null>(null);
 
   const [recipe, setRecipe] = React.useState<string | null>(null);
 
@@ -55,7 +56,7 @@ export default function BasicModal(props: ComponentProps) {
     try {
       startLoading();
       ingredients = ingredients.map(({ value }: { value: string }) => value);
-      const response = await fetch("/python-api/provide-recipe", {
+      const response = await fetch("api/generate-recipe", {
         method: "POST",
         body: JSON.stringify({
           selectedMeal: meal.name,
@@ -72,17 +73,32 @@ export default function BasicModal(props: ComponentProps) {
         throw new Error("Network response was not ok");
       }
 
-      console.log("responseData", responseData);
-      setRecipe(responseData.choices[0].message.content);
-      if (ref.current) {
-        ref.current.audio.current.play();
+      const recipe: string | null = responseData.recipe;
+      const base64Blob: string | undefined = responseData.base64Blob;
+
+      if (base64Blob) {
+        // Usage example
+        const contentType = "audio/mpeg"; // Replace with the actual content type
+        const blob = base64StringToBlob(base64Blob, contentType);
+
+        // get audio from blob and play audio through audio player
+        const audio = new Audio(URL.createObjectURL(blob));
+        setAudio(audio);
       }
+      setRecipe(recipe);
+
       stopLoading();
     } catch (e) {
       stopLoading();
       console.error(e);
     }
   };
+
+  React.useEffect(() => {
+    if (audio && ref.current) {
+      ref.current.audio.current.play();
+    }
+  }, [recipe]);
 
   return (
     <>
@@ -124,10 +140,10 @@ export default function BasicModal(props: ComponentProps) {
                 {recipe}
               </Typography>
               <AudioPlayer
+                src={audio?.src}
                 ref={ref}
                 autoPlay
-                onPlay={(e) => console.log("onPlay")}
-                // other props here
+                onPlay={(e) => console.log("playing audio")}
               />
             </Stack>
           )}

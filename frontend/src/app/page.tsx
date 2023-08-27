@@ -5,13 +5,11 @@ import { DeleteOutline } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import {
   Button,
-  Checkbox,
   FormControl,
   FormHelperText,
   IconButton,
   List,
   ListItem,
-  ListItemIcon,
   Stack,
   Input,
   InputLabel,
@@ -28,7 +26,7 @@ import {
 
 export default function Home() {
   const [meals, setMeals] = useState<{ name: string; description: string }[]>(
-    []
+    [],
   );
   const methods = useForm({
     shouldUnregister: true,
@@ -65,27 +63,21 @@ export default function Home() {
   const onSubmit = async (data: FieldValues) => {
     try {
       startLoading();
-      console.log("data", data);
       const ingredients = data.ingredients.map(
-        ({ value }: { value: string }) => value
+        ({ value }: { value: string }) => value,
       );
-      console.log("ingredients", ingredients);
 
-      const response = await fetch("/python-api/generate-meal", {
+      const response = await fetch("api/generate-meal", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ingredients,
-          selectedMeal: "",
-          model,
         }),
       });
 
       const responseData = await response.json();
-
-      console.log("responseData", responseData);
 
       if (!response.ok) {
         console.log("response => ", responseData);
@@ -93,26 +85,7 @@ export default function Home() {
         throw new Error("Network response was not ok");
       }
 
-      // split the string using regex
-      // the regex checks for a number followed by a period
-
-      const meals = responseData;
-
-      // let meals = responseData.choices[0].message.content;
-
-      // console.log("meals => ", meals);
-
-      // meals = meals.split(/\d+\./g);
-      // // remove first array item
-      // meals.shift();
-
-      // // before each - in the stribg, add a new line, but only if the - has a space before it
-      // meals = meals.map((meal: string) => meal.replace(/(?<=\s)-/g, "\n-"));
-
-      // // replace : with new line
-      // meals = meals.map((meal: string) => meal.replace(/:/g, "\n"));
-
-      console.log("data => ", meals);
+      const meals = responseData.meals;
 
       setMeals(meals);
       stopLoading();
@@ -150,9 +123,6 @@ export default function Home() {
 
                     return (
                       <ListItem key={field.id}>
-                        {/* <ListItemIcon>
-                          <Checkbox />
-                        </ListItemIcon> */}
                         <FormControl fullWidth>
                           <Input
                             id={field.id}

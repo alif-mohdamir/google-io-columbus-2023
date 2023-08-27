@@ -45,7 +45,7 @@ export default function StyledDropzone() {
       ...(isDragAccept ? { borderColor: palette.success.main } : {}),
       ...(isDragReject ? { borderColor: palette.error.main } : {}),
     }),
-    [isFocused, isDragAccept, isDragReject]
+    [isFocused, isDragAccept, isDragReject],
   );
 
   return (
