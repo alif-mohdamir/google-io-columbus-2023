@@ -1,28 +1,26 @@
 "use client";
 
-import BasicModal from "@/components/modal";
-import { DeleteOutline } from "@mui/icons-material";
-import { LoadingButton } from "@mui/lab";
+import MealModal from "@/components/meal-modal";
 import {
-  Button,
-  FormControl,
-  FormHelperText,
-  IconButton,
-  List,
-  ListItem,
-  Stack,
-  Input,
-  InputLabel,
-  Select,
-  MenuItem,
-} from "@mui/material";
-import { useState } from "react";
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Trash2, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   FieldValues,
   FormProvider,
   useFieldArray,
   useForm,
 } from "react-hook-form";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const [meals, setMeals] = useState<{ name: string; description: string }[]>(
@@ -37,10 +35,6 @@ export default function Home() {
 
   const [model, setModel] = useState("gpt-3.5-turbo");
 
-  const removeIngredient = (index: number) => () => {
-    remove(index);
-  };
-
   const { fields, append, remove } = useFieldArray({
     control: methods.control, // control props comes from useForm (optional: if you are using FormContext)
     name: "ingredients", // unique name for your Field Array
@@ -52,6 +46,10 @@ export default function Home() {
     append({ value: "" });
   };
 
+  const removeIngredient = (index: number) => () => {
+    remove(index);
+  };
+
   const startLoading = () => {
     setLoading(true);
   };
@@ -60,7 +58,7 @@ export default function Home() {
     setLoading(false);
   };
 
-  const onSubmit = async (data: FieldValues) => {
+  const generateMeals = async (data: FieldValues) => {
     try {
       startLoading();
       const ingredients = data.ingredients.map(
@@ -95,105 +93,125 @@ export default function Home() {
     }
   };
 
+  // prevent user from leaving page while loading
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (loading) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [loading]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="flex flex-col gap-10">
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)}>
-            <Stack direction="row" spacing={4}>
-              <div className="max-w-md w-full flex flex-col gap-5">
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">Model</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={model}
-                    label="Model"
-                    onChange={(e) => setModel(e.target.value as string)}
-                  >
-                    <MenuItem value={"gpt-3.5-turbo"}>GPT-3.5-Turbo</MenuItem>
-                    <MenuItem value={"bard"}>Bard</MenuItem>
-                  </Select>
-                </FormControl>
-                <List subheader="Ingredients" className="w-full">
-                  {fields.map((field, index) => {
-                    const ingredients = methods.formState.errors
-                      .ingredients as any;
-                    const errorValue = ingredients?.[index]?.value as any;
+    <main className="flex flex-col gap-5 p-5">
+      <div className="flex justify-end">
+        <ThemeToggle />
+      </div>
+      <div className="flex min-h-screen flex-col items-center justify-between">
+        <div className="grid grid-flow-col gap-10">
+          <FormProvider {...methods}>
+            <form onSubmit={methods.handleSubmit(generateMeals)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Add ingredients</CardTitle>
+                  <CardDescription>
+                    Add all the ingredients in your kitchen.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="flex flex-col gap-4">
+                    {fields.map(({ id }, index) => {
+                      return (
+                        <li key={id}>
+                          <Form {...methods}>
+                            <div className="flex w-full max-w-sm items-center space-x-2">
+                              <Input
+                                id={id}
+                                placeholder="e.g 1 cup of flour"
+                                {...methods.register(
+                                  `ingredients.${index}.value`,
+                                  {
+                                    validate: (value) => value !== "",
+                                    required: "Ingredient can't be empty",
+                                  },
+                                )}
+                                disabled={
+                                  methods.formState.isSubmitting || loading
+                                }
+                              />
 
-                    return (
-                      <ListItem key={field.id}>
-                        <FormControl fullWidth>
-                          <Input
-                            id={field.id}
-                            placeholder="e.g 1 cup of flour"
-                            error={Boolean(errorValue)}
-                            {...methods.register(`ingredients.${index}.value`, {
-                              validate: (value) => value !== "",
-                              required: "Ingredient can't be empty",
-                            })}
-                            disabled={methods.formState.isSubmitting || loading}
-                          />
-                          {errorValue && (
-                            <FormHelperText error>
-                              {errorValue?.message}
-                            </FormHelperText>
-                          )}
-                        </FormControl>
-
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={removeIngredient(index)}
-                          disabled={methods.formState.isSubmitting || loading}
-                        >
-                          <DeleteOutline />
-                        </IconButton>
-                      </ListItem>
-                    );
-                  })}
-                </List>
-                <Stack direction="row" spacing={2}>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={removeIngredient(index)}
+                                disabled={
+                                  methods.formState.isSubmitting || loading
+                                }
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </Button>
+                            </div>
+                          </Form>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </CardContent>
+                <CardFooter className="justify-between gap-2">
                   <Button
-                    color="secondary"
-                    variant="outlined"
                     onClick={addIngredient}
-                    sx={{ textTransform: "none" }}
                     disabled={methods.formState.isSubmitting}
                   >
                     Add ingredient
                   </Button>
-                  <LoadingButton
-                    color="secondary"
-                    variant="outlined"
+                  <Button
                     type="submit"
-                    loading={loading}
-                    sx={{ textTransform: "none" }}
                     disabled={
                       methods.formState.isSubmitting ||
                       !methods.formState.isValid
                     }
                   >
-                    Generate meals
-                  </LoadingButton>
-                </Stack>
-              </div>
-            </Stack>
-          </form>
-        </FormProvider>
-        {meals.length > 0 && (
-          <List subheader="Meals" className="w-full gap-2 flex flex-col">
-            {meals.map((meal, index) => (
-              <ListItem className="rounded" key={index}>
-                <BasicModal
-                  // label={`Meal ${index + 1}`}
-                  meal={meal}
-                  ingredients={methods.getValues().ingredients}
-                />
-              </ListItem>
-            ))}
-          </List>
-        )}
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Generate meals"
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </form>
+          </FormProvider>
+
+          {meals.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Generated meals</CardTitle>
+                <CardDescription>
+                  Click a meal to generate a recipe.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul>
+                  {meals.map((meal, index) => (
+                    <li key={index}>
+                      <MealModal
+                        meal={meal}
+                        ingredients={methods.getValues().ingredients}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </main>
   );

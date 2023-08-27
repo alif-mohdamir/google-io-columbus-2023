@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  List,
-  ListItem,
-  ListItemText,
-  ListSubheader,
-  Stack,
-  useTheme,
-} from "@mui/material";
 import React, { useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -36,20 +28,19 @@ export default function StyledDropzone() {
     isDragReject,
     fileRejections,
   } = useDropzone({ accept: { "image/*": ["png", "jpg", "jpeg"] } });
-  const { palette } = useTheme();
 
   const style: React.CSSProperties = useMemo(
     () => ({
       ...baseStyle,
-      ...(isFocused ? { borderColor: palette.info.main } : {}),
-      ...(isDragAccept ? { borderColor: palette.success.main } : {}),
-      ...(isDragReject ? { borderColor: palette.error.main } : {}),
+      // ...(isFocused ? { borderColor: palette.info.main } : {}),
+      // ...(isDragAccept ? { borderColor: palette.success.main } : {}),
+      // ...(isDragReject ? { borderColor: palette.error.main } : {}),
     }),
     [isFocused, isDragAccept, isDragReject],
   );
 
   return (
-    <Stack spacing={1}>
+    <div className="flex flex-col gap-1">
       <div className="container">
         <div {...getRootProps({ style })}>
           <input {...getInputProps()} />
@@ -58,25 +49,18 @@ export default function StyledDropzone() {
       </div>
       {fileRejections.length > 0 && (
         <div>
-          <List
-            subheader={
-              <ListSubheader
-                component="div"
-                id="nested-list-subheader"
-              ></ListSubheader>
-            }
-          >
+          <ol>
             {fileRejections.map(({ file, errors }) => (
-              <ListItem className="text-red-500 text-sm" key={file.name}>
-                <ListItemText primary={file.name} />
+              <li className="text-red-500 text-sm" key={file.name}>
+                <div className="text-lg"> {file.name}</div>
                 {errors.map((e) => (
                   <div key={e.code}>{e.message}</div>
                 ))}
-              </ListItem>
+              </li>
             ))}
-          </List>
+          </ol>
         </div>
       )}
-    </Stack>
+    </div>
   );
 }
