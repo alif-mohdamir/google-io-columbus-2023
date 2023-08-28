@@ -34,10 +34,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-__pycache__
-
-output.mp3
-
 # next-pwa
 /public/precache.*.*.js
 /public/sw.js
