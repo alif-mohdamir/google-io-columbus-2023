@@ -113,7 +113,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col gap-5 p-5">
-      <div className="flex">
+      <div className="flex justify-between">
         <Form {...methods}>
           <FormField
             control={methods.control}
@@ -141,7 +141,6 @@ export default function Home() {
             )}
           />
         </Form>
-        <div className="grow" />
         <ThemeToggle />
       </div>
       <div className="flex flex-col items-center justify-between">
