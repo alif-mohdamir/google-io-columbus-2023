@@ -8,7 +8,7 @@
 - **[OpenAI](https://platform.openai.com/overview):** Integrates the power of OpenAI's AI models for recipe generation.
 - **[ElevenLabs](https://docs.elevenlabs.io/welcome/introduction):** Generative AI text to speech and voice cloning.
 - **[ShadCN/UI](https://ui.shadcn.com/):** Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.
-- **[TailwindCSS](https://tailwindcss.com/):** A utility-first CSS framework packed with classes like **flex**, **pt-4**, **text-center**, and **rotate-90** that can be composed to build any design, directly in your markup.
+- **[TailwindCSS](https://tailwindcss.com/):** A utility-first CSS framework packed with classes like **flex**, **pt-4**, **text-center** and **rotate-90** that can be composed to build any design, directly in your markup.
 
 ## Getting Started 🚀
 
@@ -21,7 +21,7 @@ git clone https://github.com/alif-mohdamir/google-io-columbus-2023.git
 cd google-io-columbus-2023
 ```
 
-2. **Install Dependencies:** Inside the `frontend` folder, use npm or yarn to install the required dependencies.
+2. **Install Dependencies:** Use npm or yarn to install the required dependencies.
 
 ```
 npm install
@@ -29,7 +29,7 @@ npm install
 yarn install
 ```
 
-3. **Environment Variables:** Create a `.env.development.local` file in the root of the `frontend` folder and add the following environment variables:
+3. **Environment Variables:** Create a `.env.development.local` file in the root of the `frontend` foler and add the following environment variables:
 
 ```
 OPENAI_API_KEY=your_openai_api_key
@@ -38,7 +38,7 @@ ELEVENLABS_VOICE_ID=your_elevenlabs_voice_id
 # see https://elevenlabs.io/voice-lab about generating a voice id
 ```
 
-4. **Run the App:** Inside the `frontend` folder, start the development server to run the app locally.
+4. **Run the App:** Start the development server to run the app locally.
 
 ```
 npm run dev

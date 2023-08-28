@@ -114,7 +114,7 @@ export default function Home() {
       <div className="flex justify-end">
         <ThemeToggle />
       </div>
-      <div className="flex min-h-screen flex-col items-center justify-between">
+      <div className="flex flex-col items-center justify-between">
         <div className="grid md:grid-flow-col grid-flow-row gap-10">
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(generateMeals)}>

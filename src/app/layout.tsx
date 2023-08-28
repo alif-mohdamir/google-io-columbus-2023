@@ -5,9 +5,16 @@ import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const APP_NAME = "grAIt Recipes";
+const APP_DESCRIPTION = "Generate recipes with AI";
+
 export const metadata: Metadata = {
-  title: "grAIt Recipes",
-  description: "Generate recipes with AI",
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
+  manifest: "/manifest.json",
+  viewport: "width=device-width, initial-scale=1",
+  icons: ["/favicon.ico"],
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
