@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { openaiChatCompletion, palmGenerateMessage } from "@/ai-models";
+import { blobToBase64String } from "@/utils";
 
 interface RequestBody {
   ingredients: string[];
@@ -81,15 +82,7 @@ export async function POST(request: Request) {
 
   // convert audio to base64
   const blob = await elevenLabsRes.blob();
-  const arrayBuffer = await blob.arrayBuffer();
-  const byteArray = new Uint8Array(arrayBuffer);
-
-  let binary = "";
-  byteArray.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-
-  const base64Blob = btoa(binary);
+  const base64Blob = await blobToBase64String(blob);
 
   return NextResponse.json({ recipe, base64Blob });
 }

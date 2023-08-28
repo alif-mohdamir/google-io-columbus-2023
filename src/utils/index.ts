@@ -25,3 +25,22 @@ export function base64StringToBlob(
 
   return new Blob(byteArrays, { type: contentType });
 }
+
+/**
+ * Convert a Blob into a base64 string.
+ * @param blob
+ * @returns Promise<string>
+ */
+export async function blobToBase64String(blob: Blob): Promise<string> {
+  const arrayBuffer = await blob.arrayBuffer();
+  const byteArray = new Uint8Array(arrayBuffer);
+
+  let binary = "";
+  byteArray.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  const base64string = btoa(binary);
+
+  return base64string;
+}

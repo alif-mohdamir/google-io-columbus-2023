@@ -33,11 +33,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface FormValues {
+  model: string;
+  ingredients: { value: string }[];
+}
+
 export default function Home() {
   const [meals, setMeals] = useState<{ name: string; description: string }[]>(
     [],
   );
-  const methods = useForm({
+  const methods = useForm<FormValues>({
     shouldUnregister: true,
     shouldFocusError: true,
     defaultValues: {
@@ -125,7 +130,7 @@ export default function Home() {
               <FormItem>
                 {/* <FormLabel>AI Model</FormLabel> */}
                 <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
