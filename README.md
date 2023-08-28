@@ -1,6 +1,6 @@
 # grAIt Recipes 🍜
 
-### Welcome to the **grAIt Recipes** app! This is a revolutionary application that harnesses the power of AI to generate delicious recipes from the ingredients you already have in your kitchen. No more wondering what to cook with the items in your pantry – let AI do the thinking for you!
+Welcome to the **grAIt Recipes** app! This is a revolutionary application that harnesses the power of AI to generate delicious recipes from the ingredients you already have in your kitchen. No more wondering what to cook with the items in your pantry – let AI do the thinking for you!
 
 ## Technologies Used 💻
 
