@@ -3,15 +3,15 @@ const path = require("path");
 const withPWAInit = require("next-pwa");
 
 const withPWA = withPWAInit({
-  dest: 'public',
+  dest: "public",
   buildExcludes: ["app-build-manifest.json"],
-})
+});
 
 const generateAppDirEntry = (entry) => {
-  const packagePath = require.resolve('next-pwa');
+  const packagePath = require.resolve("next-pwa");
   const packageDirectory = path.dirname(packagePath);
   const registerJs = path.join(packageDirectory, "register.js");
-  
+
   return entry().then((entries) => {
     // Register SW on App directory, solution: https://github.com/shadowwalker/next-pwa/pull/427
     if (entries["main-app"] && !entries["main-app"].includes(registerJs)) {
@@ -35,12 +35,12 @@ const nextConfig = () => {
   //   ];
   // };
   return {
-    output: 'standalone',
+    output: "standalone",
     reactStrictMode: true,
     webpack: (config) => {
       const entry = generateAppDirEntry(config.entry);
       config.entry = () => entry;
-  
+
       return config;
     },
   };

@@ -41,7 +41,7 @@ export default function Home() {
     shouldUnregister: true,
     shouldFocusError: true,
     defaultValues: {
-      model: "gpt-3.5-turbo",
+      model: "gpt-3.5-turbo-16k",
       ingredients: [{ value: "" }],
     },
   });
@@ -70,6 +70,8 @@ export default function Home() {
         ({ value }: { value: string }) => value,
       );
 
+      const model = data.model;
+
       const response = await fetch("api/generate-meal", {
         method: "POST",
         headers: {
@@ -77,6 +79,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           ingredients,
+          model,
         }),
       });
 
@@ -129,10 +132,10 @@ export default function Home() {
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>AI Models</SelectLabel>
-                        <SelectItem value="gpt-3.5-turbo">GPT-3.5</SelectItem>
-                        <SelectItem disabled value="bard">
-                          Bard
+                        <SelectItem value="gpt-3.5-turbo-16k">
+                          GPT-3.5
                         </SelectItem>
+                        <SelectItem value="palm">PaLM</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -228,10 +231,7 @@ export default function Home() {
                 <ul>
                   {meals.map((meal, index) => (
                     <li key={index}>
-                      <MealModal
-                        meal={meal}
-                        ingredients={methods.getValues().ingredients}
-                      />
+                      <MealModal meal={meal} methods={methods} />
                     </li>
                   ))}
                 </ul>

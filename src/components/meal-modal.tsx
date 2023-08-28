@@ -13,14 +13,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { UseFormReturn } from "react-hook-form";
 
 interface ComponentProps {
   meal: { name: string; description: string };
-  ingredients: any;
+  methods: UseFormReturn<
+    {
+      model: string;
+      ingredients: {
+        value: string;
+      }[];
+    },
+    any,
+    undefined
+  >;
 }
 
 export default function MealModal(props: ComponentProps) {
-  let { meal, ingredients } = props;
+  const { meal, methods } = props;
+
+  const { ingredients: ingredientsObjects, model } = methods.getValues();
+
   // ref for audio player
   const ref = React.useRef<any>(null);
   const [audio, setAudio] = React.useState<HTMLAudioElement | null>(null);
@@ -40,13 +53,15 @@ export default function MealModal(props: ComponentProps) {
   const generateRecipe = async () => {
     try {
       startLoading();
-      ingredients = ingredients.map(({ value }: { value: string }) => value);
+      const ingredients = ingredientsObjects.map(
+        ({ value }: { value: string }) => value,
+      );
       const response = await fetch("api/generate-recipe", {
         method: "POST",
         body: JSON.stringify({
           selectedMeal: meal.name,
           ingredients,
-          model: "",
+          model,
         }),
       });
 

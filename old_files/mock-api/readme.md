@@ -5,7 +5,7 @@ nvm use
 ```
 
 ```
-npm i 
+npm i
 ```
 
 ```

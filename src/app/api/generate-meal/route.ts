@@ -1,32 +1,41 @@
-import OpenAI from "openai";
+import { openaiChatCompletion, palmGenerateMessage } from "@/ai-models";
 import { NextResponse } from "next/server";
 
-const openai = new OpenAI();
+async function aiTextGeneration(model: string, prompt: string) {
+  let content: string | null = null;
 
-export async function POST(request: Request) {
-  const { ingredients }: { ingredients: [] } = await request.json();
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo-16k",
-    messages: [
+  if (model === "palm") {
+    content = await palmGenerateMessage([
+      {
+        content: prompt,
+      },
+    ]);
+  } else {
+    content = await openaiChatCompletion([
       {
         role: "user",
-        content: `Give me 10 meals based on the following ingredients. Not all items need to be used: ${ingredients.join(
-          ", ",
-        )}`,
+        content: prompt,
       },
-    ],
-    temperature: 1,
-    max_tokens: 1638,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-  });
+    ]);
+  }
 
-  let matches = response.choices[0].message.content?.match(/\d+\..*/g);
+  return content;
+}
+
+export async function POST(request: Request) {
+  const { ingredients, model }: { ingredients: []; model: string } =
+    await request.json();
+
+  const prompt = `Give me 10 meals based on the following ingredients. Not all items need to be used: ${ingredients.join(
+    ", ",
+  )}`;
+
+  const content = await aiTextGeneration(model, prompt);
+
+  let matches = content?.match(/\d+\..*/g);
 
   if (!matches) {
-    return NextResponse.json({ message: "hi mom" });
+    return NextResponse.json({ meals: [] });
   }
 
   const meals: { name: string; description: string }[] = [];

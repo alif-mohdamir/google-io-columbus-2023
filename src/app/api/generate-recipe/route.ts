@@ -1,47 +1,61 @@
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
-
-const openai = new OpenAI();
+import { openaiChatCompletion, palmGenerateMessage } from "@/ai-models";
 
 interface RequestBody {
   ingredients: string[];
   selectedMeal: string;
+  model: string;
 }
 
 const voiceId = process.env.ELEVENLABS_VOICE_ID as string;
 const apiKey = process.env.ELEVENLABS_API_KEY as string;
 
-export async function POST(request: Request) {
-  const { ingredients, selectedMeal }: RequestBody = await request.json();
+async function aiTextGeneration(
+  model: string,
+  prompt: string,
+  selectedMeal: string,
+) {
+  let content: string | null = null;
+  const context = `Provide me a recipe for ${selectedMeal}`;
 
-  // generate recipe
-  const content = "test";
-  const openAiResponse = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo-16k",
-    messages: [
+  if (model === "palm") {
+    content = await palmGenerateMessage(
+      [
+        {
+          content: prompt,
+        },
+      ],
+      context,
+    );
+  } else {
+    content = await openaiChatCompletion([
       {
         role: "user",
-        content: `Give me some meals based on the following ingredients. Not all items need to be used. ${ingredients.join(
-          ", ",
-        )}`,
+        content: prompt,
       },
       {
         role: "assistant",
-        content: content,
+        content: "test",
       },
       {
         role: "user",
-        content: `Provide me a recipe for ${selectedMeal}`,
+        content: context,
       },
-    ],
-    temperature: 1,
-    max_tokens: 1638,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-  });
+    ]);
+  }
 
-  const recipe = openAiResponse.choices[0].message.content;
+  return content;
+}
+
+export async function POST(request: Request) {
+  const { ingredients, selectedMeal, model }: RequestBody =
+    await request.json();
+
+  const prompt = `Give me a recipe based on the following ingredients. ${ingredients.join(
+    ", ",
+  )}`;
+
+  const recipe = await aiTextGeneration(model, prompt, selectedMeal);
 
   // generate audio
   const elevenLabsRes = await fetch(
