@@ -47,7 +47,6 @@ export default function Home() {
     shouldFocusError: true,
     defaultValues: {
       model: "gpt-3.5-turbo-16k",
-      ingredients: [{ value: "" }],
     },
   });
 
