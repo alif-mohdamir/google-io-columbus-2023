@@ -31,9 +31,6 @@ interface ComponentProps {
 
 export default function MealModal(props: ComponentProps) {
   const { meal, methods } = props;
-
-  const { ingredients: ingredientsObjects, model } = methods.getValues();
-
   // ref for audio player
   const ref = React.useRef<any>(null);
   const [audio, setAudio] = React.useState<HTMLAudioElement | null>(null);
@@ -53,6 +50,7 @@ export default function MealModal(props: ComponentProps) {
   const generateRecipe = async () => {
     try {
       startLoading();
+      const { ingredients: ingredientsObjects, model } = methods.getValues();
       const ingredients = ingredientsObjects.map(
         ({ value }: { value: string }) => value,
       );
