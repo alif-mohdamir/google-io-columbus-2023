@@ -9,18 +9,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+  Form,
+  // FormLabel,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import {
-  FieldValues,
-  FormProvider,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import { FieldValues, useFieldArray, useForm } from "react-hook-form";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Home() {
   const [meals, setMeals] = useState<{ name: string; description: string }[]>(
@@ -29,17 +40,20 @@ export default function Home() {
   const methods = useForm({
     shouldUnregister: true,
     shouldFocusError: true,
+    defaultValues: {
+      model: "gpt-3.5-turbo",
+      ingredients: [{ value: "" }],
+    },
   });
 
-  const [loading, setLoading] = useState(false);
-
-  const [model, setModel] = useState("gpt-3.5-turbo");
+  const isSubmitting = methods.formState.isSubmitting;
+  const errors = methods.formState.errors;
 
   const { fields, append, remove } = useFieldArray({
-    control: methods.control, // control props comes from useForm (optional: if you are using FormContext)
-    name: "ingredients", // unique name for your Field Array
+    control: methods.control,
+    name: "ingredients",
     shouldUnregister: true,
-    rules: { required: true },
+    rules: { required: "Ingredients must be added." },
   });
 
   const addIngredient = () => {
@@ -50,17 +64,8 @@ export default function Home() {
     remove(index);
   };
 
-  const startLoading = () => {
-    setLoading(true);
-  };
-
-  const stopLoading = () => {
-    setLoading(false);
-  };
-
   const generateMeals = async (data: FieldValues) => {
     try {
-      startLoading();
       const ingredients = data.ingredients.map(
         ({ value }: { value: string }) => value,
       );
@@ -79,16 +84,13 @@ export default function Home() {
 
       if (!response.ok) {
         console.log("response => ", responseData);
-        stopLoading();
         throw new Error("Network response was not ok");
       }
 
       const meals = responseData.meals;
 
       setMeals(meals);
-      stopLoading();
     } catch (e) {
-      stopLoading();
       console.error(e);
     }
   };
@@ -96,7 +98,7 @@ export default function Home() {
   // prevent user from leaving page while loading
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (loading) {
+      if (isSubmitting) {
         e.preventDefault();
         e.returnValue = "";
       }
@@ -107,78 +109,104 @@ export default function Home() {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [loading]);
+  }, [isSubmitting]);
 
   return (
     <main className="flex flex-col gap-5 p-5">
-      <div className="flex justify-end">
+      <div className="flex">
+        <Form {...methods}>
+          <FormField
+            control={methods.control}
+            name="model"
+            render={({ field }) => (
+              <FormItem>
+                {/* <FormLabel>AI Model</FormLabel> */}
+                <FormControl>
+                  <Select {...field} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>AI Models</SelectLabel>
+                        <SelectItem value="gpt-3.5-turbo">GPT-3.5</SelectItem>
+                        <SelectItem disabled value="bard">
+                          Bard
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </Form>
+        <div className="grow" />
         <ThemeToggle />
       </div>
       <div className="flex flex-col items-center justify-between">
         <div className="grid md:grid-flow-col grid-flow-row gap-10">
-          <FormProvider {...methods}>
+          <Form {...methods}>
             <form onSubmit={methods.handleSubmit(generateMeals)}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Add ingredients</CardTitle>
+                  <CardTitle>Added ingredients</CardTitle>
                   <CardDescription>
                     Add all the ingredients in your kitchen.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="flex flex-col gap-4">
-                    {fields.map(({ id }, index) => {
-                      return (
-                        <li key={id}>
-                          <Form {...methods}>
-                            <div className="flex w-full max-w-sm items-center space-x-2">
-                              <Input
-                                id={id}
-                                placeholder="e.g 1 cup of flour"
-                                {...methods.register(
-                                  `ingredients.${index}.value`,
-                                  {
-                                    validate: (value) => value !== "",
-                                    required: "Ingredient can't be empty",
-                                  },
-                                )}
-                                disabled={
-                                  methods.formState.isSubmitting || loading
-                                }
-                              />
+                    {errors["ingredients"]?.root && (
+                      <li className="text-red-500 text-sm">
+                        {errors["ingredients"].root.message?.toString()}
+                      </li>
+                    )}
+                    {fields.map(({ id }, index) => (
+                      <li key={id}>
+                        <FormField
+                          control={methods.control}
+                          name={`ingredients.${index}.value`}
+                          rules={{ required: "Ingredient can't be empty" }}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <div className="flex gap-2">
+                                  <Input
+                                    id={id}
+                                    placeholder="e.g 1 cup of flour"
+                                    disabled={isSubmitting}
+                                    {...field}
+                                  />
 
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={removeIngredient(index)}
-                                disabled={
-                                  methods.formState.isSubmitting || loading
-                                }
-                              >
-                                <Trash2 className="h-5 w-5" />
-                              </Button>
-                            </div>
-                          </Form>
-                        </li>
-                      );
-                    })}
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={removeIngredient(index)}
+                                    disabled={isSubmitting}
+                                  >
+                                    <Trash2 className="h-5 w-5" />
+                                  </Button>
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </li>
+                    ))}
                   </ul>
                 </CardContent>
                 <CardFooter className="justify-between gap-2">
                   <Button
+                    variant="ghost"
                     onClick={addIngredient}
-                    disabled={methods.formState.isSubmitting}
+                    disabled={isSubmitting}
                   >
                     Add ingredient
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={
-                      methods.formState.isSubmitting ||
-                      !methods.formState.isValid
-                    }
-                  >
-                    {loading ? (
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       "Generate meals"
@@ -187,7 +215,7 @@ export default function Home() {
                 </CardFooter>
               </Card>
             </form>
-          </FormProvider>
+          </Form>
 
           {meals.length > 0 && (
             <Card>
