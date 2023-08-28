@@ -1,4 +1,34 @@
 import { chatCompletion as openaiChatCompletion } from "./openai";
 import { generateMessage as palmGenerateMessage } from "./palm";
 
-export { openaiChatCompletion, palmGenerateMessage };
+/**
+ * A function that generates text with the given model and prompt
+ * @param model
+ * @param prompt
+ * @returns Promise<string | null>
+ */
+async function generateAiText(model: string, prompt: string, context?: string) {
+  let content: string | null = null;
+
+  if (model === "palm") {
+    content = await palmGenerateMessage(
+      [
+        {
+          content: prompt,
+        },
+      ],
+      context,
+    );
+  } else {
+    content = await openaiChatCompletion([
+      {
+        role: "user",
+        content: prompt,
+      },
+    ]);
+  }
+
+  return content;
+}
+
+export { openaiChatCompletion, palmGenerateMessage, generateAiText };

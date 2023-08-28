@@ -31,6 +31,7 @@ interface ComponentProps {
 
 export default function MealModal(props: ComponentProps) {
   const { meal, methods } = props;
+  const mealName = meal.name;
   // ref for audio player
   const ref = React.useRef<any>(null);
   const [audio, setAudio] = React.useState<HTMLAudioElement | null>(null);
@@ -57,7 +58,7 @@ export default function MealModal(props: ComponentProps) {
       const response = await fetch("api/generate-recipe", {
         method: "POST",
         body: JSON.stringify({
-          selectedMeal: meal.name,
+          selectedMeal: mealName,
           ingredients,
           model,
         }),
@@ -117,14 +118,18 @@ export default function MealModal(props: ComponentProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="link">{meal.name}</Button>
+        <Button variant="link" className="text-left">
+          {mealName}
+        </Button>
       </DialogTrigger>
       <DialogContent
         onPointerDownOutside={(e) => loading && e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>{meal.name}</DialogTitle>
-          <DialogDescription>{meal.description}</DialogDescription>
+          <DialogTitle className="text-left">{mealName}</DialogTitle>
+          <DialogDescription className="text-left">
+            {meal.description}
+          </DialogDescription>
         </DialogHeader>
 
         <Button onClick={generateRecipe} disabled={loading}>
@@ -137,9 +142,9 @@ export default function MealModal(props: ComponentProps) {
       </DialogContent>
 
       {recipe && (
-        <DialogContent>
+        <DialogContent className="max-h-[75vh] overflow-auto">
           <DialogHeader>
-            <DialogTitle>{meal.name} Recipe</DialogTitle>
+            <DialogTitle className="text-left">{mealName} Recipe</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2">
             <div className="whitespace-pre-line">{recipe}</div>

@@ -119,131 +119,133 @@ export default function Home() {
   }, [isSubmitting]);
 
   return (
-    <main className="flex flex-col gap-5 p-5">
-      <div className="flex justify-between">
-        <Form {...methods}>
-          <FormField
-            control={methods.control}
-            name="model"
-            render={({ field }) => (
-              <FormItem>
-                {/* <FormLabel>AI Model</FormLabel> */}
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>AI Models</SelectLabel>
-                        <SelectItem value="gpt-3.5-turbo-16k">
-                          GPT-3.5
-                        </SelectItem>
-                        <SelectItem value="palm">PaLM</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </Form>
-        <ThemeToggle />
-      </div>
-      <div className="flex flex-col items-center justify-between">
-        <div className="grid md:grid-flow-col grid-flow-row gap-10">
+    <div className="flex justify-center">
+      <div className="flex flex-col gap-5 p-5 sm:max-w-4xl w-full">
+        <div className="flex justify-between">
           <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(generateMeals)}>
+            <FormField
+              control={methods.control}
+              name="model"
+              render={({ field }) => (
+                <FormItem>
+                  {/* <FormLabel>AI Model</FormLabel> */}
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>AI Models</SelectLabel>
+                          <SelectItem value="gpt-3.5-turbo-16k">
+                            GPT-3.5
+                          </SelectItem>
+                          <SelectItem value="palm">PaLM</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </Form>
+          <ThemeToggle />
+        </div>
+        <div className="flex flex-col items-center justify-between">
+          <div className="grid sm:grid-cols-2 grid-cols-1 gap-5 w-full">
+            <Form {...methods}>
+              <form onSubmit={methods.handleSubmit(generateMeals)}>
+                <Card className="col-span-1 w-full">
+                  <CardHeader>
+                    <CardTitle>Added ingredients</CardTitle>
+                    <CardDescription>
+                      Add all the ingredients in your kitchen.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="flex flex-col gap-4">
+                      {errors["ingredients"]?.root && (
+                        <li className="text-red-500 text-sm">
+                          {errors["ingredients"].root.message?.toString()}
+                        </li>
+                      )}
+                      {fields.map(({ id }, index) => (
+                        <li key={id}>
+                          <FormField
+                            control={methods.control}
+                            name={`ingredients.${index}.value`}
+                            rules={{ required: "Ingredient can't be empty" }}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <div className="flex gap-2">
+                                    <Input
+                                      id={id}
+                                      placeholder="e.g 1 cup of flour"
+                                      disabled={isSubmitting}
+                                      {...field}
+                                    />
+
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={removeIngredient(index)}
+                                      disabled={isSubmitting}
+                                    >
+                                      <Trash2 className="h-5 w-5" />
+                                    </Button>
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter className="justify-between gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={addIngredient}
+                      disabled={isSubmitting}
+                    >
+                      Add ingredient
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Generate meals"
+                      )}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </form>
+            </Form>
+
+            {meals.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Added ingredients</CardTitle>
+                  <CardTitle>Generated meals</CardTitle>
                   <CardDescription>
-                    Add all the ingredients in your kitchen.
+                    Click a meal to generate a recipe.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ul className="flex flex-col gap-4">
-                    {errors["ingredients"]?.root && (
-                      <li className="text-red-500 text-sm">
-                        {errors["ingredients"].root.message?.toString()}
-                      </li>
-                    )}
-                    {fields.map(({ id }, index) => (
-                      <li key={id}>
-                        <FormField
-                          control={methods.control}
-                          name={`ingredients.${index}.value`}
-                          rules={{ required: "Ingredient can't be empty" }}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <div className="flex gap-2">
-                                  <Input
-                                    id={id}
-                                    placeholder="e.g 1 cup of flour"
-                                    disabled={isSubmitting}
-                                    {...field}
-                                  />
-
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={removeIngredient(index)}
-                                    disabled={isSubmitting}
-                                  >
-                                    <Trash2 className="h-5 w-5" />
-                                  </Button>
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                  <ul>
+                    {meals.map((meal, index) => (
+                      <li key={index}>
+                        <MealModal meal={meal} methods={methods} />
                       </li>
                     ))}
                   </ul>
                 </CardContent>
-                <CardFooter className="justify-between gap-2">
-                  <Button
-                    variant="ghost"
-                    onClick={addIngredient}
-                    disabled={isSubmitting}
-                  >
-                    Add ingredient
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Generate meals"
-                    )}
-                  </Button>
-                </CardFooter>
               </Card>
-            </form>
-          </Form>
-
-          {meals.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Generated meals</CardTitle>
-                <CardDescription>
-                  Click a meal to generate a recipe.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul>
-                  {meals.map((meal, index) => (
-                    <li key={index}>
-                      <MealModal meal={meal} methods={methods} />
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

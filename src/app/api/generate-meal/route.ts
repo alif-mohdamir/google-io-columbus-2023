@@ -1,26 +1,5 @@
-import { openaiChatCompletion, palmGenerateMessage } from "@/ai-models";
+import { generateAiText } from "@/ai-models";
 import { NextResponse } from "next/server";
-
-async function aiTextGeneration(model: string, prompt: string) {
-  let content: string | null = null;
-
-  if (model === "palm") {
-    content = await palmGenerateMessage([
-      {
-        content: prompt,
-      },
-    ]);
-  } else {
-    content = await openaiChatCompletion([
-      {
-        role: "user",
-        content: prompt,
-      },
-    ]);
-  }
-
-  return content;
-}
 
 export async function POST(request: Request) {
   const { ingredients, model }: { ingredients: []; model: string } =
@@ -30,7 +9,7 @@ export async function POST(request: Request) {
     ", ",
   )}`;
 
-  const content = await aiTextGeneration(model, prompt);
+  const content = await generateAiText(model, prompt);
 
   let matches = content?.match(/\d+\..*/g);
 
@@ -49,8 +28,15 @@ export async function POST(request: Request) {
       description = match.split(":")[1].trim();
     }
 
+    name = name
+    .replace(/\d+\.\s*/, "")
+    .toLowerCase() // capitalize first letter of each word
+    .split(" ")
+    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+    .join(" ")
+
     meals.push({
-      name: name.replace(/\d+\.\s*/, ""),
+      name,
       description: description,
     });
   }
