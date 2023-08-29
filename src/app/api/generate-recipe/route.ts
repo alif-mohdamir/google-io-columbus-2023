@@ -21,6 +21,28 @@ export async function POST(request: Request) {
   const context = "You are Gordon Ramsey";
   const recipe = await generateAiText(model, prompt, context);
 
+  // // get voices
+  // const elevenLabsVoicesRes = await fetch(
+  //   "https://api.elevenlabs.io/v1/voices",
+  //   {
+  //     method: "GET",
+  //     headers: {
+  //       accept: "application/json",
+  //       "xi-api-key": apiKey,
+  //     },
+  //   },
+  // );
+
+  // if (!elevenLabsVoicesRes.ok) {
+  //   const error = await elevenLabsVoicesRes.json();
+  //   console.error("Error getting voices", error);
+  //   return NextResponse.json({ recipe });
+  // }
+
+  // const elevenLabsVoices = await elevenLabsVoicesRes.json();
+
+  // console.log("elevenLabsVoices", elevenLabsVoices)
+
   // generate audio
   const elevenLabsRes = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
@@ -39,7 +61,8 @@ export async function POST(request: Request) {
   );
 
   if (!elevenLabsRes.ok) {
-    console.error("Error generating audio");
+    const error = await elevenLabsRes.json();
+    console.error("Error generating audio", error);
     return NextResponse.json({ recipe });
   }
 
