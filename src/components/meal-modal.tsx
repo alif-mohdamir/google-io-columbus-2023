@@ -142,7 +142,7 @@ export default function MealModal(props: ComponentProps) {
       </DialogContent>
 
       {recipe && (
-        <DialogContent className="max-h-[75vh] overflow-auto">
+        <DialogContent className="max-h-[75vh] overflow-auto max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-left">{mealName} Recipe</DialogTitle>
           </DialogHeader>
