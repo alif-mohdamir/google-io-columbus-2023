@@ -47,6 +47,7 @@ export default function Home() {
     shouldFocusError: true,
     defaultValues: {
       model: "gpt-3.5-turbo-16k",
+      ingredients: [],
     },
   });
 
@@ -171,9 +172,9 @@ export default function Home() {
         </div>
         <div className="flex flex-col items-center justify-between">
           <div className="grid sm:grid-cols-2 grid-cols-1 gap-5 w-full">
-            <Form {...methods}>
-              <form onSubmit={methods.handleSubmit(generateMeals)}>
-                <Card className="col-span-1 w-full">
+            <Card className="col-span-1 w-full">
+              <Form {...methods}>
+                <form onSubmit={methods.handleSubmit(generateMeals)}>
                   <CardHeader>
                     <CardTitle>Added ingredients</CardTitle>
                     <CardDescription>
@@ -227,20 +228,24 @@ export default function Home() {
                       variant="ghost"
                       onClick={addIngredient}
                       disabled={isSubmitting}
+                      type="button" // prevent form submission
                     >
                       Add ingredient
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <>
+                          <Loader2 className="mr-2 w h-4 w-4 animate-spin" />
+                          <div>Generating meals</div>
+                        </>
                       ) : (
                         "Generate meals"
                       )}
                     </Button>
                   </CardFooter>
-                </Card>
-              </form>
-            </Form>
+                </form>
+              </Form>
+            </Card>
 
             {meals.length > 0 && (
               <Card>

@@ -13,19 +13,24 @@ export async function chatCompletion(
   messages: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[],
   model = "gpt-3.5-turbo-16k",
 ) {
-  const response = await openai.chat.completions.create({
-    model,
-    messages,
-    temperature: 1,
-    max_tokens: 1638,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-  });
+  try {
+    const response = await openai.chat.completions.create({
+      model,
+      messages,
+      temperature: 1,
+      max_tokens: 1638,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    });
 
-  const content = response.choices[0].message.content;
+    const content = response.choices[0].message.content;
 
-  return content;
+    return content;
+  } catch (error) {
+    console.error("Error generating message", error);
+    return null;
+  }
 }
 
 /**
@@ -35,15 +40,17 @@ export async function chatCompletion(
  * @returns generated image url
  */
 
-export async function imageGeneration(
-  text: string,
-) {
-  const response = await openai.images.generate({
-    prompt: text,
-    n: 1,
-    size: "256x256",
-  });
+export async function imageGeneration(text: string) {
+  try {
+    const response = await openai.images.generate({
+      prompt: text,
+      n: 1,
+      size: "256x256",
+    });
 
-  return response.data[0].url;
-  
+    return response.data[0].url ?? "";
+  } catch (error) {
+    console.error("Error generating image", error);
+    return "";
+  }
 }

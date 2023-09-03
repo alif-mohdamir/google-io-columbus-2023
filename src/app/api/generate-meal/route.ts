@@ -29,11 +29,11 @@ export async function POST(request: Request) {
     }
 
     name = name
-    .replace(/\d+\.\s*/, "")
-    .toLowerCase() // capitalize first letter of each word
-    .split(" ")
-    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-    .join(" ")
+      .replace(/\d+\.\s*/, "")
+      .toLowerCase() // capitalize first letter of each word
+      .split(" ")
+      .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+      .join(" ");
 
     meals.push({
       name,

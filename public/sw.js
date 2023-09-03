@@ -17,13 +17,13 @@ self.addEventListener("install", function (event) {
       if (offlineFallbackPage === "/fallback.js") {
         return cache.add(
           new Response(
-            "TODO: Update the value of the offlineFallbackPage constant in the serviceworker."
-          )
+            "TODO: Update the value of the offlineFallbackPage constant in the serviceworker.",
+          ),
         );
       }
 
       return cache.add(offlineFallbackPage, assets);
-    })
+    }),
   );
 });
 
@@ -43,10 +43,10 @@ self.addEventListener("fetch", function (event) {
       })
       .catch(function (error) {
         console.log(
-          "[PWA] Network request Failed. Serving content from cache: " + error
+          "[PWA] Network request Failed. Serving content from cache: " + error,
         );
         return fromCache(event.request);
-      })
+      }),
   );
 });
 

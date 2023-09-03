@@ -5,7 +5,7 @@ import { imageGeneration } from "@/ai-models/openai";
 
 interface RequestBody {
   ingredients: string[];
-  meal: { name: string, description: string};
+  meal: { name: string; description?: string };
   model: string;
 }
 
@@ -13,23 +13,25 @@ const voiceId = process.env.ELEVENLABS_VOICE_ID as string;
 const apiKey = process.env.ELEVENLABS_API_KEY as string;
 
 export async function POST(request: Request) {
-  const { ingredients, meal, model }: RequestBody =
-    await request.json();
-
+  const { ingredients, meal, model }: RequestBody = await request.json();
   const { name: mealName, description: mealDescription } = meal;
   const prompt = `Provide me a recipe for ${mealName} using the following ingredients. ${ingredients.join(
     ", ",
   )}`;
   const context = "You are Gordon Ramsey";
-  // const recipe = await generateAiText(model, prompt, context);
 
-  // // generate ai image from meal description  
-  // const aiImageRes = await imageGeneration(mealDescription);
-  
   // generate recipe and image in parallel
-  const res = await Promise.all([generateAiText(model, prompt, context), imageGeneration(mealDescription)])
-  
+  const res = await Promise.all([
+    generateAiText(model, prompt, context),
+    imageGeneration(mealDescription ?? mealName),
+  ]);
+
   const recipe = res[0];
+
+  if (!recipe) {
+    throw new Error("Error generating recipe");
+  }
+
   const image = res[1];
 
   // // get voices
