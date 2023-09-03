@@ -1,7 +1,7 @@
 {
-  "name": "Next PWA",
-  "short_name": "Next PWA",
-  "description": "Next PWA example using next-pwa",
+  "name": "grAIt Recipes",
+  "short_name": "grAIt Recipes",
+  "description": "Generate recipes with AI",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "fullscreen",

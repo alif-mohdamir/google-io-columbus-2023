@@ -3,11 +3,11 @@ interface Props {}
 export const Meta = ({}: Props) => {
   return (
     <>
-      <meta name="application-name" content="PWA App" />
+      <meta name="application-name" content="grAIt Recipes" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      <meta name="apple-mobile-web-app-title" content="PWA App" />
-      <meta name="description" content="Best PWA App in the world" />
+      <meta name="apple-mobile-web-app-title" content="grAIt Recipes" />
+      <meta name="description" content="Generate recipes with AI" />
       <meta name="format-detection" content="telephone=no" />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="msapplication-config" content="./icons/browserconfig.xml" />
