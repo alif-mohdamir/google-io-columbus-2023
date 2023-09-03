@@ -20,15 +20,18 @@ export async function POST(request: Request) {
   )}`;
   const context = "You are Gordon Ramsey";
 
+  const imagePrompt = `A photo of ${
+    mealDescription ?? mealName
+  } taken from far away. The entire meal is in the frame.`;
   // generate recipe and image in parallel
   const res = await Promise.all([
     generateAiText(model, prompt, context),
-    imageGeneration(mealDescription ?? mealName),
+    imageGeneration(imagePrompt),
   ]);
 
   const recipe = res[0];
 
-  if (!recipe) {
+  if (!recipe || !recipe.length) {
     throw new Error("Error generating recipe");
   }
 

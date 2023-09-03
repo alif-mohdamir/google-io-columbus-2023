@@ -159,7 +159,7 @@ export default function Home() {
                           <SelectItem value="gpt-3.5-turbo-16k">
                             GPT-3.5
                           </SelectItem>
-                          <SelectItem value="palm">PaLM</SelectItem>
+                          <SelectItem value="palm">PaLM 2</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>

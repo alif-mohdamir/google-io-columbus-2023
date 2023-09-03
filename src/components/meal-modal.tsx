@@ -32,13 +32,13 @@ interface ComponentProps {
 
 export default function MealModal(props: ComponentProps) {
   const { meal, methods } = props;
-  const mealName = meal.name;
+  const { name, description } = meal;
   // ref for audio player
   const ref = React.useRef<any>(null);
   const [audio, setAudio] = React.useState<HTMLAudioElement | null>(null);
 
   const [recipe, setRecipe] = React.useState<string | null>(null);
-  const [image, setImage] = React.useState<string | null>(null);
+  const [image, setImage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
   const startLoading = () => {
@@ -68,9 +68,8 @@ export default function MealModal(props: ComponentProps) {
       const responseData = await response.json();
 
       if (!response.ok) {
-        console.log("response => ", responseData);
-        stopLoading();
-        throw new Error("Network response was not ok");
+        console.error("response => ", responseData);
+        throw new Error("Generate recipe failed");
       }
 
       const recipe: string | null = responseData.recipe;
@@ -86,7 +85,7 @@ export default function MealModal(props: ComponentProps) {
         setAudio(audio);
       }
       setRecipe(recipe);
-      setImage(image ?? null);
+      setImage(image ?? "");
       stopLoading();
     } catch (e) {
       stopLoading();
@@ -116,20 +115,35 @@ export default function MealModal(props: ComponentProps) {
     };
   }, [loading]);
 
+  // reset recipe when meal changes
+  React.useEffect(() => {
+    setRecipe(null);
+    setImage("");
+    setAudio(null);
+  }, [meal]);
+
+  const onPointerDownOutside = (
+    e: CustomEvent<{
+      originalEvent: PointerEvent;
+    }>,
+  ) => {
+    if (loading) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="link" className="text-left">
-          {mealName}
+          {name}
         </Button>
       </DialogTrigger>
-      <DialogContent
-        onPointerDownOutside={(e) => loading && e.preventDefault()}
-      >
+      <DialogContent onPointerDownOutside={onPointerDownOutside}>
         <DialogHeader>
-          <DialogTitle className="text-left">{mealName}</DialogTitle>
+          <DialogTitle className="text-left">{name}</DialogTitle>
           <DialogDescription className="text-left">
-            {meal.description}
+            {description}
           </DialogDescription>
         </DialogHeader>
 
@@ -145,19 +159,17 @@ export default function MealModal(props: ComponentProps) {
       {recipe && (
         <DialogContent className="max-h-[75vh] overflow-auto max-w-4xl">
           <DialogHeader>
-            <DialogTitle className="text-left">{mealName} Recipe</DialogTitle>
+            <DialogTitle className="text-left">{name} Recipe</DialogTitle>
           </DialogHeader>
           <DialogDescription className="sm:hidden">
-            {image && (
-              <Image
-                alt={mealName.toLowerCase()}
-                height={128}
-                width={128}
-                src={image}
-              />
-            )}
+            <Image
+              alt={name.toLowerCase()}
+              height={256}
+              width={256}
+              src={image}
+            />
           </DialogDescription>
-          <div className="flex flex-col gap-2 relative">
+          <div className="flex flex-col gap-8 relative">
             <div className="whitespace-pre-line">{recipe}</div>
             <AudioPlayer
               src={audio?.src}
@@ -165,16 +177,15 @@ export default function MealModal(props: ComponentProps) {
               autoPlay
               onPlay={() => console.log("playing audio")}
             />
-            {image && (
-              <div className="absolute right-10 hidden sm:inline-block">
-                <Image
-                  alt={mealName.toLowerCase()}
-                  height={128}
-                  width={128}
-                  src={image}
-                />
-              </div>
-            )}
+
+            <div className="absolute right-10 hidden sm:inline-block">
+              <Image
+                alt={name.toLowerCase()}
+                height={256}
+                width={256}
+                src={image}
+              />
+            </div>
           </div>
         </DialogContent>
       )}
