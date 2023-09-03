@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { UseFormReturn } from "react-hook-form";
+import Image from "next/image";
 
 interface ComponentProps {
   meal: { name: string; description: string };
@@ -37,7 +38,7 @@ export default function MealModal(props: ComponentProps) {
   const [audio, setAudio] = React.useState<HTMLAudioElement | null>(null);
 
   const [recipe, setRecipe] = React.useState<string | null>(null);
-
+  const [image, setImage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 
   const startLoading = () => {
@@ -58,9 +59,9 @@ export default function MealModal(props: ComponentProps) {
       const response = await fetch("api/generate-recipe", {
         method: "POST",
         body: JSON.stringify({
-          selectedMeal: mealName,
           ingredients,
           model,
+          meal,
         }),
       });
 
@@ -74,7 +75,7 @@ export default function MealModal(props: ComponentProps) {
 
       const recipe: string | null = responseData.recipe;
       const base64Blob: string | undefined = responseData.base64Blob;
-
+      const image: string | undefined = responseData.image;
       if (base64Blob) {
         // Usage example
         const contentType = "audio/mpeg"; // Replace with the actual content type
@@ -85,7 +86,7 @@ export default function MealModal(props: ComponentProps) {
         setAudio(audio);
       }
       setRecipe(recipe);
-
+      setImage(image ?? null);
       stopLoading();
     } catch (e) {
       stopLoading();
@@ -146,7 +147,17 @@ export default function MealModal(props: ComponentProps) {
           <DialogHeader>
             <DialogTitle className="text-left">{mealName} Recipe</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-2">
+          <DialogDescription className="sm:hidden">
+            {image && (
+              <Image
+                alt={mealName.toLowerCase()}
+                height={128}
+                width={128}
+                src={image}
+              />
+            )}
+          </DialogDescription>
+          <div className="flex flex-col gap-2 relative">
             <div className="whitespace-pre-line">{recipe}</div>
             <AudioPlayer
               src={audio?.src}
@@ -154,6 +165,16 @@ export default function MealModal(props: ComponentProps) {
               autoPlay
               onPlay={() => console.log("playing audio")}
             />
+            {image && (
+              <div className="absolute right-10 hidden sm:inline-block">
+                <Image
+                  alt={mealName.toLowerCase()}
+                  height={128}
+                  width={128}
+                  src={image}
+                />
+              </div>
+            )}
           </div>
         </DialogContent>
       )}

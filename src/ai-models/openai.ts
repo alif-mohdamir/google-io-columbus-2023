@@ -3,7 +3,7 @@ import OpenAI from "openai";
 const openai = new OpenAI();
 
 /**
- * Text generation using OpenaAI's Chat Completion API
+ * Text generation using OpenAI's Chat Completion API
  * @link https://platform.openai.com/docs/guides/gpt/chat-completions-api
  * @param messages
  * @param model
@@ -26,4 +26,24 @@ export async function chatCompletion(
   const content = response.choices[0].message.content;
 
   return content;
+}
+
+/**
+ * Image generation using OpenAI's DALL-E API
+ * @link https://beta.openai.com/docs/guides/dall-e
+ * @param text
+ * @returns generated image url
+ */
+
+export async function imageGeneration(
+  text: string,
+) {
+  const response = await openai.images.generate({
+    prompt: text,
+    n: 1,
+    size: "256x256",
+  });
+
+  return response.data[0].url;
+  
 }

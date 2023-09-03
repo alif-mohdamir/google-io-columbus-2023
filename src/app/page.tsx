@@ -76,6 +76,9 @@ export default function Home() {
 
       const model = data.model;
 
+      localStorage.setItem("lastUsedModel", model);
+      localStorage.setItem("lastUsedIngredients", JSON.stringify(ingredients));
+
       const response = await fetch("api/generate-meal", {
         method: "POST",
         headers: {
@@ -101,6 +104,21 @@ export default function Home() {
       console.error(e);
     }
   };
+
+  // load last used model and ingredients
+  useEffect(() => {
+    const lastUsedModel = localStorage.getItem("lastUsedModel");
+    const lastUsedIngredients = localStorage.getItem("lastUsedIngredients");
+
+    if (lastUsedModel) {
+      methods.setValue("model", lastUsedModel);
+    }
+
+    if (lastUsedIngredients) {
+      const ingredients = JSON.parse(lastUsedIngredients);
+      append(ingredients.map((value: string) => ({ value })));
+    }
+  }, []);
 
   // prevent user from leaving page while loading
   useEffect(() => {

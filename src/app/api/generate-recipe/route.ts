@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { generateAiText } from "@/ai-models";
 import { blobToBase64String } from "@/utils";
+import { imageGeneration } from "@/ai-models/openai";
 
 interface RequestBody {
   ingredients: string[];
-  selectedMeal: string;
+  meal: { name: string, description: string};
   model: string;
 }
 
@@ -12,14 +13,24 @@ const voiceId = process.env.ELEVENLABS_VOICE_ID as string;
 const apiKey = process.env.ELEVENLABS_API_KEY as string;
 
 export async function POST(request: Request) {
-  const { ingredients, selectedMeal, model }: RequestBody =
+  const { ingredients, meal, model }: RequestBody =
     await request.json();
 
-  const prompt = `Provide me a recipe for ${selectedMeal} using the following ingredients. ${ingredients.join(
+  const { name: mealName, description: mealDescription } = meal;
+  const prompt = `Provide me a recipe for ${mealName} using the following ingredients. ${ingredients.join(
     ", ",
   )}`;
   const context = "You are Gordon Ramsey";
-  const recipe = await generateAiText(model, prompt, context);
+  // const recipe = await generateAiText(model, prompt, context);
+
+  // // generate ai image from meal description  
+  // const aiImageRes = await imageGeneration(mealDescription);
+  
+  // generate recipe and image in parallel
+  const res = await Promise.all([generateAiText(model, prompt, context), imageGeneration(mealDescription)])
+  
+  const recipe = res[0];
+  const image = res[1];
 
   // // get voices
   // const elevenLabsVoicesRes = await fetch(
@@ -36,7 +47,7 @@ export async function POST(request: Request) {
   // if (!elevenLabsVoicesRes.ok) {
   //   const error = await elevenLabsVoicesRes.json();
   //   console.error("Error getting voices", error);
-  //   return NextResponse.json({ recipe });
+  //   return NextResponse.json({ recipe, aiImageRes });
   // }
 
   // const elevenLabsVoices = await elevenLabsVoicesRes.json();
@@ -63,12 +74,12 @@ export async function POST(request: Request) {
   if (!elevenLabsRes.ok) {
     const error = await elevenLabsRes.json();
     console.error("Error generating audio", error);
-    return NextResponse.json({ recipe });
+    return NextResponse.json({ recipe, image });
   }
 
   // convert audio to base64
   const blob = await elevenLabsRes.blob();
   const base64Blob = await blobToBase64String(blob);
 
-  return NextResponse.json({ recipe, base64Blob });
+  return NextResponse.json({ recipe, base64Blob, image });
 }
