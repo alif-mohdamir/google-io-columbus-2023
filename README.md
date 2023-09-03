@@ -6,7 +6,7 @@ Welcome to the **grAIt Recipes** app! This is a revolutionary application that h
 
 - **[Next.js](https://nextjs.org/)**: A popular React framework for building efficient and dynamic web applications.
 - **[OpenAI](https://platform.openai.com/overview):** Integrates the power of OpenAI's AI models for recipe and meal image generation.
-- **[PaLM API](https://developers.generativeai.google/guide/palm_api_overview):** Utilizes Google's LLM for recipe generation.
+- **[PaLM API](https://developers.generativeai.google/guide/palm_api_overview):** Utilizes Google's PaLM 2 LLM for recipe generation.
 - **[ElevenLabs](https://docs.elevenlabs.io/welcome/introduction):** Generative AI text to speech and voice cloning.
 - **[Shadcn/ui](https://ui.shadcn.com/):** Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.
 - **[TailwindCSS](https://tailwindcss.com/):** A utility-first CSS framework packed with classes like **flex**, **pt-4**, **text-center** and **rotate-90** that can be composed to build any design, directly in your markup.
