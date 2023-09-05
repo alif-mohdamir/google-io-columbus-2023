@@ -7,7 +7,7 @@ import { generateMessage as palmGenerateMessage } from "./palm";
  * @param prompt
  * @returns Promise<string | null>
  */
-async function generateAiText(model: string, prompt: string, context?: string) {
+async function generateAiText(model: string, prompt: string, context?: string, stream?: boolean) {
   let content: string | null = null;
 
   if (model === "palm") {
@@ -25,7 +25,7 @@ async function generateAiText(model: string, prompt: string, context?: string) {
         role: "user",
         content: prompt,
       },
-    ]);
+    ], model, stream);
   }
 
   return content;

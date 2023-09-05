@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { generateAiText } from "@/ai-models";
-import { blobToBase64String } from "@/utils";
-import { imageGeneration } from "@/ai-models/openai";
+import { chatCompletion } from "@/ai-models/openai";
+import { OpenAIStream, StreamingTextResponse } from "ai";
+
+export const runtime = "edge";
 
 interface RequestBody {
   ingredients: string[];
@@ -9,82 +9,31 @@ interface RequestBody {
   model: string;
 }
 
-const voiceId = process.env.ELEVENLABS_VOICE_ID as string;
-const apiKey = process.env.ELEVENLABS_API_KEY as string;
-
 export async function POST(request: Request) {
   const { ingredients, meal, model }: RequestBody = await request.json();
-  const { name: mealName, description: mealDescription } = meal;
+  const { name: mealName } = meal;
   const prompt = `Provide me a recipe for ${mealName} using the following ingredients. ${ingredients.join(
     ", ",
   )}`;
-  const context = "You are Gordon Ramsey";
 
-  const imagePrompt = `A photo of ${
-    mealDescription ?? mealName
-  } taken from far away. The entire meal is in the frame.`;
-  // generate recipe and image in parallel
-  const res = await Promise.all([
-    generateAiText(model, prompt, context),
-    imageGeneration(imagePrompt),
-  ]);
+  const recipe = await chatCompletion([
+    {
+      role: "system",
+      content: "You are Gordan Ramsey"
+    },
+    {
+      role: "user",
+      content: prompt,
+    },
+  ], model, true);
 
-  const recipe = res[0];
-
-  if (!recipe || !recipe.length) {
+  if (!recipe) {
     throw new Error("Error generating recipe");
   }
 
-  const image = res[1];
+  // Convert the response into a friendly text-stream
+  const stream = OpenAIStream(recipe);
 
-  // // get voices
-  // const elevenLabsVoicesRes = await fetch(
-  //   "https://api.elevenlabs.io/v1/voices",
-  //   {
-  //     method: "GET",
-  //     headers: {
-  //       accept: "application/json",
-  //       "xi-api-key": apiKey,
-  //     },
-  //   },
-  // );
-
-  // if (!elevenLabsVoicesRes.ok) {
-  //   const error = await elevenLabsVoicesRes.json();
-  //   console.error("Error getting voices", error);
-  //   return NextResponse.json({ recipe, aiImageRes });
-  // }
-
-  // const elevenLabsVoices = await elevenLabsVoicesRes.json();
-
-  // console.log("elevenLabsVoices", elevenLabsVoices)
-
-  // generate audio
-  const elevenLabsRes = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-    {
-      method: "POST",
-      headers: {
-        accept: "audio/mpeg",
-        "Content-Type": "application/json",
-        "xi-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        text: recipe,
-        model_id: "eleven_monolingual_v1",
-      }),
-    },
-  );
-
-  if (!elevenLabsRes.ok) {
-    const error = await elevenLabsRes.json();
-    console.error("Error generating audio", error);
-    return NextResponse.json({ recipe, image });
-  }
-
-  // convert audio to base64
-  const blob = await elevenLabsRes.blob();
-  const base64Blob = await blobToBase64String(blob);
-
-  return NextResponse.json({ recipe, base64Blob, image });
+  // Respond with the stream
+  return new StreamingTextResponse(stream);
 }

@@ -12,6 +12,7 @@ const openai = new OpenAI();
 export async function chatCompletion(
   messages: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[],
   model = "gpt-3.5-turbo-16k",
+  stream = false,
 ) {
   try {
     const response = await openai.chat.completions.create({
@@ -22,11 +23,17 @@ export async function chatCompletion(
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
+      stream,
     });
 
-    const content = response.choices[0].message.content;
+    if (stream) {
+      return response as any;
+    }
+    const nonStreamResponse = response as OpenAI.Chat.Completions.ChatCompletion;
+    const content = nonStreamResponse.choices[0].message.content;
 
     return content;
+
   } catch (error) {
     console.error("Error generating message", error);
     return null;
